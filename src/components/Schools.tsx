@@ -56,8 +56,8 @@ const mockSchools: School[] = [
     hasInternet: true,
     commercialRegistration: { url: '#' },
     contractManagerId: { url: '#' },
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-20T14:30:00Z'
+    createdAt: '2025-01-15T10:00:00Z',
+    updatedAt: '2025-01-20T14:30:00Z'
   },
   {
     _id: '2',
@@ -76,8 +76,8 @@ const mockSchools: School[] = [
     hasInternet: false,
     commercialRegistration: { url: '#' },
     contractManagerId: { url: '#' },
-    createdAt: '2024-01-10T08:00:00Z',
-    updatedAt: '2024-01-18T16:15:00Z'
+    createdAt: '2025-01-10T08:00:00Z',
+    updatedAt: '2025-01-18T16:15:00Z'
   },
   {
     _id: '3',
@@ -96,8 +96,8 @@ const mockSchools: School[] = [
     hasInternet: true,
     commercialRegistration: { url: '#' },
     contractManagerId: { url: '#' },
-    createdAt: '2024-01-05T09:30:00Z',
-    updatedAt: '2024-01-22T11:45:00Z'
+    createdAt: '2025-01-05T09:30:00Z',
+    updatedAt: '2025-01-22T11:45:00Z'
   }
 ];
 

@@ -149,7 +149,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             {/* Footer */}
             <div className="mt-8 text-center">
               <p className="text-sm text-gray-500">
-                © 2024 نظام إدارة المدارس. جميع الحقوق محفوظة.
+                © 2025 نظام إدارة المدارس. جميع الحقوق محفوظة.
               </p>
             </div>
           </div>
