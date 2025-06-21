@@ -15,6 +15,8 @@ import {
   Users,
   Building
 } from 'lucide-react';
+import { saveAs } from 'file-saver';
+import * as XLSX from 'xlsx';
 
 interface School {
   _id: string;
@@ -37,70 +39,6 @@ interface School {
   updatedAt: string;
 }
 
-// Mock data for demonstration
-const mockSchools: School[] = [
-  {
-    _id: '1',
-    schoolName: 'مدرسة النور الأهلية',
-    city: 'الرياض',
-    contractManagerName: 'أحمد محمد العلي',
-    phoneNumber: '+966501234567',
-    email: 'info@alnoor-school.edu.sa',
-    kindergartenStudents: 45,
-    primary1to4Students: 120,
-    primary5to6Students: 80,
-    intermediate1to2Students: 90,
-    intermediate3Students: 35,
-    secondaryStudents: 110,
-    hasComputerLab: true,
-    hasInternet: true,
-    commercialRegistration: { url: '#' },
-    contractManagerId: { url: '#' },
-    createdAt: '2025-01-15T10:00:00Z',
-    updatedAt: '2025-01-20T14:30:00Z'
-  },
-  {
-    _id: '2',
-    schoolName: 'مدارس المستقبل',
-    city: 'جدة',
-    contractManagerName: 'فاطمة سالم القحطاني',
-    phoneNumber: '+966512345678',
-    email: 'contact@future-schools.edu.sa',
-    kindergartenStudents: 38,
-    primary1to4Students: 95,
-    primary5to6Students: 65,
-    intermediate1to2Students: 78,
-    intermediate3Students: 42,
-    secondaryStudents: 88,
-    hasComputerLab: true,
-    hasInternet: false,
-    commercialRegistration: { url: '#' },
-    contractManagerId: { url: '#' },
-    createdAt: '2025-01-10T08:00:00Z',
-    updatedAt: '2025-01-18T16:15:00Z'
-  },
-  {
-    _id: '3',
-    schoolName: 'مدرسة التميز النموذجية',
-    city: 'الدمام',
-    contractManagerName: 'خالد عبدالله الشمري',
-    phoneNumber: '+966523456789',
-    email: 'admin@tamayuz-school.edu.sa',
-    kindergartenStudents: 52,
-    primary1to4Students: 140,
-    primary5to6Students: 95,
-    intermediate1to2Students: 105,
-    intermediate3Students: 48,
-    secondaryStudents: 125,
-    hasComputerLab: true,
-    hasInternet: true,
-    commercialRegistration: { url: '#' },
-    contractManagerId: { url: '#' },
-    createdAt: '2025-01-05T09:30:00Z',
-    updatedAt: '2025-01-22T11:45:00Z'
-  }
-];
-
 const Schools: React.FC = () => {
   const { logout } = useAuth();
   const [schools, setSchools] = useState<School[]>([]);
@@ -120,18 +58,70 @@ const Schools: React.FC = () => {
   });
 
   useEffect(() => {
-    // Simulate API call
+    // Fetch schools from API
     const fetchSchools = async () => {
       setLoading(true);
       setError('');
-      
+      const token = localStorage.getItem('userToken');
+      if (!token) {
+        setError('الرجاء تسجيل الدخول أولاً');
+        setLoading(false);
+        return;
+      }
       try {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        setSchools(mockSchools);
-        setFilteredSchools(mockSchools);
-      } catch (err) {
+        const response = await fetch('https://evaaz-poll-hqzi.vercel.app/api/school/allschools', {
+          headers: {
+            'token': token
+          }
+        });
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        // Map the API response to the School[] structure
+        type APISchool = {
+          _id: string;
+          schoolName: string;
+          city: string;
+          contractManagerName: string;
+          phoneNumber: string;
+          email: string;
+          kindergartenStudents: number;
+          primary1to4Students: number;
+          primary5to6Students: number;
+          intermediate1to2Students: number;
+          intermediate3Students: number;
+          secondaryStudents: number;
+          hasComputerLab: string;
+          hasInternet: string;
+          commercialRegistration: { id: string };
+          contractManagerId: { id: string };
+          createdAt: string;
+          updatedAt: string;
+        };
+        const schoolsData = (data['المدارس'] || []).map((item: APISchool) => ({
+          _id: item._id,
+          schoolName: item.schoolName,
+          city: item.city,
+          contractManagerName: item.contractManagerName,
+          phoneNumber: item.phoneNumber,
+          email: item.email,
+          kindergartenStudents: item.kindergartenStudents,
+          primary1to4Students: item.primary1to4Students,
+          primary5to6Students: item.primary5to6Students,
+          intermediate1to2Students: item.intermediate1to2Students,
+          intermediate3Students: item.intermediate3Students,
+          secondaryStudents: item.secondaryStudents,
+          hasComputerLab: item.hasComputerLab === 'true',
+          hasInternet: item.hasInternet === 'true',
+          commercialRegistration: { url: `/api/file/${item.commercialRegistration?.id || ''}` },
+          contractManagerId: { url: `/api/file/${item.contractManagerId?.id || ''}` },
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt
+        }));
+        setSchools(schoolsData);
+        setFilteredSchools(schoolsData);
+      } catch {
         setError('حدث خطأ أثناء تحميل المدارس');
       } finally {
         setLoading(false);
@@ -175,7 +165,7 @@ const Schools: React.FC = () => {
       if (filtered.length === 0) {
         setError('لا يوجد نتائج مطابقة لمعايير البحث');
       }
-    } catch (err) {
+    } catch {
       setError('حدث خطأ أثناء البحث');
     } finally {
       setSearchLoading(false);
@@ -215,6 +205,33 @@ const Schools: React.FC = () => {
     return school.kindergartenStudents + school.primary1to4Students + 
            school.primary5to6Students + school.intermediate1to2Students + 
            school.intermediate3Students + school.secondaryStudents;
+  };
+
+  const exportToExcel = () => {
+    // Prepare data for export (flatten objects, convert booleans, etc.)
+    const exportData = filteredSchools.map(school => ({
+      'اسم المدرسة': school.schoolName,
+      'المدينة': school.city,
+      'مدير العقد': school.contractManagerName,
+      'رقم الهاتف': school.phoneNumber,
+      'البريد الإلكتروني': school.email,
+      'عدد طلاب الروضة': school.kindergartenStudents,
+      'عدد طلاب ابتدائي (1-4)': school.primary1to4Students,
+      'عدد طلاب ابتدائي (5-6)': school.primary5to6Students,
+      'عدد طلاب متوسط (1-2)': school.intermediate1to2Students,
+      'عدد طلاب متوسط (3)': school.intermediate3Students,
+      'عدد طلاب الثانوي': school.secondaryStudents,
+      'معمل حاسب آلي': school.hasComputerLab ? 'نعم' : 'لا',
+      'خدمة الإنترنت': school.hasInternet ? 'نعم' : 'لا',
+      'تاريخ الإنشاء': new Date(school.createdAt).toLocaleDateString('ar-EG'),
+      'تاريخ التحديث': new Date(school.updatedAt).toLocaleDateString('ar-EG'),
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Schools');
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const file = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(file, 'schools.xlsx');
   };
 
   if (loading) {
@@ -371,10 +388,19 @@ const Schools: React.FC = () => {
         )}
 
         {/* Results Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-          <h3 className="text-lg font-bold text-gray-900">
-            {searchMode ? 'نتائج البحث' : 'جميع المدارس'}
-          </h3>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2">
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-bold text-gray-900">
+              {searchMode ? 'نتائج البحث' : 'جميع المدارس'}
+            </h3>
+            <button
+              onClick={exportToExcel}
+              className="flex items-center bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ml-2"
+            >
+              <Download className="w-4 h-4 ml-1" />
+              تصدير Excel
+            </button>
+          </div>
           <div className="flex items-center space-x-2 space-x-reverse text-sm text-gray-600">
             <Building className="w-4 h-4" />
             <span>{filteredSchools.length} مدرسة</span>
