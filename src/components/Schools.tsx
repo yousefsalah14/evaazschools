@@ -112,8 +112,8 @@ const Schools: React.FC = () => {
           intermediate1to2Students: item.intermediate1to2Students,
           intermediate3Students: item.intermediate3Students,
           secondaryStudents: item.secondaryStudents,
-          hasComputerLab: item.hasComputerLab === 'true',
-          hasInternet: item.hasInternet === 'true',
+          hasComputerLab: String(item.hasComputerLab).toLowerCase() === 'true',
+          hasInternet: String(item.hasInternet).toLowerCase() === 'true',
           commercialRegistration: { url: `/api/file/${item.commercialRegistration?.id || ''}` },
           contractManagerId: { url: `/api/file/${item.contractManagerId?.id || ''}` },
           createdAt: item.createdAt,
@@ -197,10 +197,6 @@ const Schools: React.FC = () => {
     logout();
   };
 
-  const isFacilityAvailable = (value: boolean) => {
-    return value;
-  };
-
   const getTotalStudents = (school: School) => {
     return school.kindergartenStudents + school.primary1to4Students + 
            school.primary5to6Students + school.intermediate1to2Students + 
@@ -221,8 +217,8 @@ const Schools: React.FC = () => {
       'عدد طلاب متوسط (1-2)': school.intermediate1to2Students,
       'عدد طلاب متوسط (3)': school.intermediate3Students,
       'عدد طلاب الثانوي': school.secondaryStudents,
-      'معمل حاسب آلي': school.hasComputerLab ? 'نعم' : 'لا',
-      'خدمة الإنترنت': school.hasInternet ? 'نعم' : 'لا',
+      'معمل حاسب آلي': school.hasComputerLab ? 'نعم ✅' : 'لا ❌',
+      'خدمة الإنترنت': school.hasInternet ? 'نعم ✅' : 'لا ❌',
       'تاريخ الإنشاء': new Date(school.createdAt).toLocaleDateString('ar-EG'),
       'تاريخ التحديث': new Date(school.updatedAt).toLocaleDateString('ar-EG'),
     }));
@@ -502,14 +498,14 @@ const Schools: React.FC = () => {
                     <h5 className="font-semibold text-gray-900 mb-3">المرافق</h5>
                     <div className="space-y-2">
                       <div className="flex items-center space-x-3 space-x-reverse">
-                        {isFacilityAvailable(school.hasComputerLab) ? 
+                        {school.hasComputerLab ? 
                           <CheckCircle className="w-5 h-5 text-green-500" /> : 
                           <XCircle className="w-5 h-5 text-red-500" />
                         }
                         <span className="text-sm text-gray-700">معمل حاسب آلي</span>
                       </div>
                       <div className="flex items-center space-x-3 space-x-reverse">
-                        {isFacilityAvailable(school.hasInternet) ? 
+                        {school.hasInternet ? 
                           <CheckCircle className="w-5 h-5 text-green-500" /> : 
                           <XCircle className="w-5 h-5 text-red-500" />
                         }
