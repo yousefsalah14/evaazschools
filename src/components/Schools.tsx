@@ -94,8 +94,8 @@ const Schools: React.FC = () => {
           secondaryStudents: number;
           hasComputerLab: string;
           hasInternet: string;
-          commercialRegistration: { id: string };
-          contractManagerId: { id: string };
+          commercialRegistration: { id: string; url: string };
+          contractManagerId: { id: string; url: string };
           createdAt: string;
           updatedAt: string;
         };
@@ -114,8 +114,8 @@ const Schools: React.FC = () => {
           secondaryStudents: item.secondaryStudents,
           hasComputerLab: String(item.hasComputerLab).toLowerCase() === 'true',
           hasInternet: String(item.hasInternet).toLowerCase() === 'true',
-          commercialRegistration: { url: `/api/file/${item.commercialRegistration?.id || ''}` },
-          contractManagerId: { url: `/api/file/${item.contractManagerId?.id || ''}` },
+          commercialRegistration: { url: item.commercialRegistration?.url || '#' },
+          contractManagerId: { url: item.contractManagerId?.url || '#' },
           createdAt: item.createdAt,
           updatedAt: item.updatedAt
         }));
